@@ -5,6 +5,5 @@ test('creates an Employee Object', () => {
     const employee = new Employee('');
 
     expect(employee.employeeName).toBe('');
-    expect(employee.EmployeeEmail).toBe();
-    expect(employee.getEamil()).toEqual(employee.employeeEmail)
+    expect(employee.getEmail()).toEqual(employee.employeeEmail)
 });
