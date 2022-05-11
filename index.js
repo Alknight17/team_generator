@@ -2,6 +2,9 @@
 const fs = require('fs');
 const inquirer = require('inquirer');
 const generateHTML = require('./lib/generateHTML');
+const Manager = require('./lib/Manager');
+const Intern = require('./lib/Intern');
+const Engineer = require('./lib/Engineer');
 
 // create empty array for employee data to populate
 let employees = [];
@@ -59,7 +62,7 @@ async function prompts() {
 		}
 	])
 
-	let employeeHandler = employee
+	//let employeeHandler = employee
 
 	let manager 
 	if (employee.employeeRole === 'Manager') {
@@ -79,10 +82,13 @@ async function prompts() {
 			}
 		])
 
-		if (manager) {
-			employeeHandler = { ...employeeHandler, manager}
-			employees.push(employeeHandler);
-		}
+			let newEmployee = new Manager
+			(employee.employeeName,
+			employee.employeeID,
+			employee.employeeEmail,
+			manager.office);
+			employees.push(newEmployee);
+		
 	}
 
 	let intern 
@@ -102,10 +108,13 @@ async function prompts() {
 				}
 			}
 		])
-		if(intern) {
-			employeeHandler = {...employeeHandler, intern}
-			employees.push(employeeHandler);
-		}
+		let newEmployee = new Intern
+			(employee.employeeName,
+			employee.employeeID,
+			employee.employeeEmail,
+			intern.school);
+			employees.push(newEmployee);
+		
 	}
 
 	let engineer 
@@ -125,10 +134,13 @@ async function prompts() {
 				}
 			}
 		])
-		if (engineer) {
-			employeeHandler = {...employeeHandler, engineer}
-			employees.push(employeeHandler);
-		}
+		let newEmployee = new Engineer
+			(employee.employeeName,
+			employee.employeeID,
+			employee.employeeEmail,
+			engineer.Github);
+			employees.push(newEmployee);
+		
 	}
 
 	const addEmployee = await inquirer.prompt([
