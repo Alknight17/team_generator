@@ -2,3 +2,156 @@
 const fs = require('fs');
 const inquirer = require('inquirer');
 const {generateHTML} = require('./lib/generateHTML');
+
+// create empty array for employee data to populate
+let employees = [];
+
+// log a message to be seen upon starting app
+console.log('Respond to the propmts accordingly to build a team profile!')
+
+async function prompts() {
+    const employee = await inquirer.prompt([
+		{
+			type: 'input',
+			name: 'employeeName',
+			message: "Please enter employees name",
+			validate: employeeNameInput => {
+				if (employeeNameInput) {
+					return true;
+				} else {
+					console.log("Enter employee name to continue");
+					return false;
+				}
+			}
+
+		},
+        {
+            type: 'input',
+			name: 'employeeID',
+			message: "Please enter employees ID",
+            validate: employeeID => {
+				if (employeeID) {
+					return true;
+				} else {
+					console.log("Enter employee ID to continue");
+					return false;
+				}
+			}
+        },
+        {
+            type: 'input',
+			name: 'employeeEmail',
+			message: "Please enter employees email",
+            validate: employeeEmail => {
+				if (employeeEmail) {
+					return true;
+				} else {
+					console.log("Enter employee email to continue");
+					return false;
+				}
+			}
+        },
+        {
+			type: 'list',
+			name: 'employeeRole',
+			message: "What role does this employee have?",
+			choices: ['Manager', 'Engineer', 'Intern'],
+		}
+	])
+
+	let employeeHandler = employee
+
+	let manager 
+	if (employee.employeeRole === 'Manager') {
+		manager = await inquirer.prompt([
+			{
+				type:'input',
+				name: 'office',
+				message: "What is this manager's office number?",
+				validate: office => {
+					if(office){
+						return true;
+					} else{
+						console.log("Enter office number to continue ")
+						return false;
+					}
+				}
+			}
+		])
+
+		if (manager) {
+			employeeHandler = { ...employeeHandler, manager}
+			employees.push(employeeHandler);
+		}
+	}
+
+	let intern 
+	if (employee.employeeRole === 'Intern') {
+		intern = await inquirer.prompt([
+			{
+				type: 'input',
+				name: 'school',
+				message: "What school does this intern attend?",
+				validate: school => {
+					if(school){
+						return true;
+					} else {
+						console.log("Enter school to continue")
+						return false;
+					}
+				}
+			}
+		])
+		if(intern) {
+			employeeHandler = {...employeeHandler, intern}
+			employees.push(employeeHandler);
+		}
+	}
+
+	let engineer 
+	if(employee.employeeRole === 'Engineer') {
+		engineer = await inquirer.prompt([
+			{
+				type: 'input',
+				name: 'Github',
+				message: "What is the engineer's Github?",
+				validate: Github => {
+					if(Github) {
+						return true;
+					} else {
+						console.log('Enter Github to continue')
+						return false;
+					}
+				}
+			}
+		])
+		if (engineer) {
+			employeeHandler = {...employeeHandler, engineer}
+			employees.push(employeeHandler);
+		}
+	}
+
+	const addEmployee = await inquirer.prompt([
+		{
+			type: 'confirm',
+			name: 'addEmployee',
+			message: "Would you like to add an additional employee?"
+		}
+	])
+	if(addEmployee.addEmployee) {
+		prompts()
+	} else {
+		// generate HTML and write file to output
+
+	}
+
+
+};    
+
+
+
+
+
+
+// call for prompts to begin
+prompts();
