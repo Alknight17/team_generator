@@ -1,7 +1,7 @@
 // consider adding validation to ensure user input is correct
 const fs = require('fs');
 const inquirer = require('inquirer');
-const {generateHTML} = require('./lib/generateHTML');
+const generateHTML = require('./lib/generateHTML');
 
 // create empty array for employee data to populate
 let employees = [];
@@ -135,17 +135,19 @@ async function prompts() {
 		{
 			type: 'confirm',
 			name: 'addEmployee',
-			message: "Would you like to add an additional employee?"
+			message: "Would you like to add an additional employee? If no, your team profile will be generated!"
 		}
 	])
 	if(addEmployee.addEmployee) {
 		prompts()
 	} else {
 		// generate HTML and write file to output
-
+		let generate = generateHTML(employees)
+		fs.writeFile('./dist/teamgenerator.html', generate, function(err) {
+			if(err) throw err
+			console.log("Team profile generated!");
+		})
 	}
-
-
 };    
 
 
