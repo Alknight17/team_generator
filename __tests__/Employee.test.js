@@ -20,11 +20,7 @@ describe("getName", () => {
     });
 });
 
-describe("getId", () => {
-    it("should return the id of the employee", () => {
-        expect(employeeExample.getId()).toEqual("123");
-    });
-});
+
 
 describe("getRole", () => {
     it("should return the role 'Employee'", () => {

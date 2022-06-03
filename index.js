@@ -152,7 +152,7 @@ function createCards() {
         }
         else if (workforce[i].getRole() == 'Engineer') {
             employeeIcon = `fa regular fa-chart-line`;
-            employeeInfo = `Github: <a href="https://github.com/${workforce[i].github}" target="_blank">${workforce[i].github}</a>`;
+            employeeInfo = `Github: <a href='https://github.com/${workforce[i].engineerGitHub}' target="_blank">${workforce[i].engineerGitHub}</a>`;
         }
         else if (workforce[i].getRole() == 'Intern') {
             employeeIcon = `fa-regular fa-pen-to-square`;
