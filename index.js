@@ -1,170 +1,182 @@
-const fs = require('fs');
 const inquirer = require('inquirer');
-const generateHTML = require('./lib/generateHTML');
+const fs = require('fs');
+const jest = require('jest');
+
+
 const Manager = require('./lib/Manager');
-const Intern = require('./lib/Intern');
 const Engineer = require('./lib/Engineer');
+const Intern = require('./lib/Intern');
 
-// create empty array for employee data to populate
-let employees = [];
 
-// log a message to be seen upon starting app
-console.log('Respond to the propmts accordingly to build a team profile!')
+let workforce = [];
 
-async function prompts() {
-    const employee = await inquirer.prompt([
-		{
-			type: 'input',
-			name: 'employeeName',
-			message: "Please enter employees name",
-			validate: employeeNameInput => {
-				if (employeeNameInput) {
-					return true;
-				} else {
-					console.log("Enter employee name to continue");
-					return false;
-				}
-			}
-
-		},
+// Initial prompts for manager
+const startTeam = () => {
+    return inquirer.prompt([
         {
             type: 'input',
-			name: 'employeeID',
-			message: "Please enter employees ID",
-            validate: employeeID => {
-				if (employeeID) {
-					return true;
-				} else {
-					console.log("Enter employee ID to continue");
-					return false;
-				}
-			}
+            message: "What is the manager's name?",
+            name: 'managerName'
         },
         {
             type: 'input',
-			name: 'employeeEmail',
-			message: "Please enter employees email",
-            validate: employeeEmail => {
-				if (employeeEmail) {
-					return true;
-				} else {
-					console.log("Enter employee email to continue");
-					return false;
-				}
-			}
+            message: "What is the manager's email?",
+            name: 'managerEmail'
         },
         {
-			type: 'list',
-			name: 'employeeRole',
-			message: "What role does this employee have?",
-			choices: ['Manager', 'Engineer', 'Intern'],
-		}
-	])
+            type: 'input',
+            message: "What is the manager's employee ID?",
+            name: 'managerId'
+        },
+        {
+            type: 'input',
+            message: "What is the manager's office number?",
+            name: 'officeNumber'
+        },
+        {
+            type: 'confirm',
+            message: "Would you like to add another team member?",
+            name: 'addEmployee',
+            default: true,
+        }
 
-	//let employeeHandler = employee
+        
+    ]).then(({ managerName, managerEmail, managerId, officeNumber, addEmployee } = response) => {
 
-	let manager 
-	if (employee.employeeRole === 'Manager') {
-		manager = await inquirer.prompt([
-			{
-				type:'input',
-				name: 'office',
-				message: "What is this manager's office number?",
-				validate: office => {
-					if(office){
-						return true;
-					} else{
-						console.log("Enter office number to continue ")
-						return false;
-					}
-				}
-			}
-		])
+        workforce.push(new Manager(managerName, managerId, managerEmail, officeNumber));
+        if (addEmployee === true) {
+            addTeamMember();
+        } else {
+            createHTML();
+        }
+    })
+};
 
-			let newEmployee = new Manager
-			(employee.employeeName,
-			employee.employeeID,
-			employee.employeeEmail,
-			manager.office);
-			employees.push(newEmployee);
-		
-	}
+// prompts for engineer/intern
+const addTeamMember = () => {
+    return inquirer.prompt([
+        {
+            type: 'list',
+            message: "What is the position this team member?",
+            name: 'employeeRole',
+            editableList: false,
+            choices: ['Engineer', 'Intern'],
+        },
+        {
+            type: 'input',
+            message: "What is the team member's name?",
+            name: 'employeeName'
+        },
+        {
+            type: 'input',
+            message: "What is the team member's email address?",
+            name: 'employeeEmail'
+        },
+        {
+            type: 'input',
+            message: "What is the team member's ID number?",
+            name: 'employeeId'
+        },
 
-	let intern 
-	if (employee.employeeRole === 'Intern') {
-		intern = await inquirer.prompt([
-			{
-				type: 'input',
-				name: 'school',
-				message: "What school does this intern attend?",
-				validate: school => {
-					if(school){
-						return true;
-					} else {
-						console.log("Enter school to continue")
-						return false;
-					}
-				}
-			}
-		])
-		let newEmployee = new Intern
-			(employee.employeeName,
-			employee.employeeID,
-			employee.employeeEmail,
-			intern.school);
-			employees.push(newEmployee);
-		
-	}
+        {
+            type: 'input',
+            message: "What is this engineer's GitHub username?",
+            name: 'engineerGitHub',
+            when: answers => answers.employeeRole == 'Engineer'
+        },
+        {
+            type: 'input',
+            message: "What school does this intern attend?",
+            name: 'internSchool',
+            when: answers => answers.employeeRole == 'Intern'
+        },
+        {
+            type: 'confirm',
+            message: "Would you like to add another team member?",
+            name: 'addEmployee',
+            default: 'true'
+        },
+    ])
+        .then(({ employeeRole, employeeName, employeeId, employeeEmail, engineerGitHub, internSchool, addEmployee } = addMember) => {
+            //split engineer and intern into seperate cards
+            if (employeeRole == "Engineer") {
+                workforce.push(new Engineer(employeeName, employeeId, employeeEmail, engineerGitHub));
+            }
+             else if (employeeRole == "Intern") {
+                workforce.push(new Intern(employeeName, employeeId, employeeEmail, internSchool));
+            }
+             if (addEmployee === true) {
+                addTeamMember();
+            }
+             else {
+                console.log(workforce);
+                let readyTeam = createCards();
+                createHTML(readyTeam);
+            }
+        })
+};
 
-	let engineer 
-	if(employee.employeeRole === 'Engineer') {
-		engineer = await inquirer.prompt([
-			{
-				type: 'input',
-				name: 'Github',
-				message: "What is the engineer's Github?",
-				validate: Github => {
-					if(Github) {
-						return true;
-					} else {
-						console.log('Enter Github to continue')
-						return false;
-					}
-				}
-			}
-		])
-		let newEmployee = new Engineer
-			(employee.employeeName,
-			employee.employeeID,
-			employee.employeeEmail,
-			engineer.Github);
-			employees.push(newEmployee);
-		
-	}
+// generate the html for the final output 
+function createHTML(cards) {
+    fs.writeFile('./dist/teamprofile.html',
+        `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <title>Team Profile</title>
+    </head>
+    <body>
+        <header class="main-header bg-danger text-white text-center h-75 m-1 p-3"><h1>The Team</h1></header>
+        <section class="main-container d-flex flex-wrap justify-content-center">${cards}</section> 
+    </body>
+    </html>
+    `,
+        (err) => err ? console.error(err) : console.log('Successfully created HTML. Check the distribution folder!'));
+};
 
-	const addEmployee = await inquirer.prompt([
-		{
-			type: 'confirm',
-			name: 'addEmployee',
-			message: "Would you like to add an additional employee? If no, your team profile will be generated!"
-		}
-	])
-	if(addEmployee.addEmployee) {
-		prompts()
-	} else {
-		// generate HTML and write file to output
-		let generate = generateHTML(employees)
-		fs.writeFile('./dist/teamgenerator.html', generate, function(err) {
-			if(err) throw err
-			console.log("Team profile generated!");
-		})
-	}
-};    
+// funtion to generate employee cards
+function createCards() {
+    let employeeCards = ``;
+    let employeeInfo = ``;
+    let employeeIcon = ``;
+
+    for (i = 0; i < workforce.length; i++) {
+        if (workforce[i].getRole() == 'Manager') {
+            employeeIcon = `fa regular fa-clipboard`;
+            employeeInfo = `Office number: ${workforce[i].officeNumber}`;
+        }
+        else if (workforce[i].getRole() == 'Engineer') {
+            employeeIcon = `fa regular fa-chart-line`;
+            employeeInfo = `Github: <a href="https://github.com/${workforce[i].github}" target="_blank">${workforce[i].github}</a>`;
+        }
+        else if (workforce[i].getRole() == 'Intern') {
+            employeeIcon = `fa-regular fa-pen-to-square`;
+            employeeInfo = `School: ${workforce[i].school}`;
+        }
+
+        
+        employeeCards += `<div class="shadow card text-white bg-primary .col-6 w-25 rounded m-1 p-3">
+    <div class="card-body">
+        <h5 class="card-title name-section">${workforce[i].name}</h5>
+        <p class"card-text">
+        <span class="mb-1"><i class="${employeeIcon}"></i></span>
+        <span class="role-section">${workforce[i].getRole()}</span>
+        </p>
+        </div>
+        <ul class="list-group">
+            <li class="list-group-item">ID: ${workforce[i].id}</li>
+            <li class="list-group-item">Email: <a href="mailto:${workforce[i].email}">${workforce[i].email}</a></li>
+            <li class="list-group-item">${employeeInfo}</li>
+        </ul>    
+    </div>`
+    }
+    return employeeCards;
+}
 
 
-
-
-
-
-// call for prompts to begin
-prompts();
+startTeam();
