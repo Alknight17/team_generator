@@ -4,7 +4,7 @@
 This application creates a basic weppage that will help you build a team of employees. Answering prompts from the command line generates an HTML page.
 
 - Here is a link to a walkthrough video:
-
+https://www.youtube.com/watch?v=yhk2t-5agFw&ab_channel=AlexKnight
 
 ## Technology Used
 - Inquirer.js
